@@ -33,51 +33,55 @@ Proyek ini mengandalkan data sensor dan produksi harian.
 
 ## Struktur Data & Repositori
 
-Proyek ini menggunakan dataset produksi harian dari Lapangan Volve yang telah melalui tahap pra-pemrosesan mandiri.
-
-### Metadata & Panduan
-
-* `Deskripsi Variabel.csv`: Penjelasan lengkap setiap atribut sensor dan satuannya.
-* `Panduan Kualitas Data.csv`: Dokumentasi standar kebersihan dan integritas data yang digunakan.
-
-### Dataset Utama
-
-* **Data Train** (`volve_train_clean.csv`): Baris data dengan nilai *choke* yang tersedia, digunakan eksklusif untuk melatih dan menguji model ML.
-* **Data Impute** (`volve_impute_clean.csv`): Baris data dengan nilai *choke* yang hilang (*null*), menjadi target akhir untuk dipulihkan oleh model.
+Proyek ini menggunakan dataset produksi harian dari Lapangan Volve yang diolah melalui 6 tahapan *notebook* yang merepresentasikan bab-bab dalam laporan akhir.
 
 ### Pohon Direktori
 
 ```text
 /
 ├── data/
-│   ├── raw/           # Dataset mentah Lapangan Volve
-│   ├── processed/     # Dataset bersih (volve_train_clean, volve_impute_clean)
-│   └── metadata/      # File deskripsi variabel dan panduan kualitas data
+│   ├── raw/           
+│   │   └── Volve Production Data_Final.xlsx     # Dataset mentah awal
+│   ├── processed/     
+│   │   ├── volve_train_clean.csv                # Data utuh hasil cleansing (Bahan AI)
+│   │   ├── volve_impute_clean.csv               # Data bolong target imputasi
+│   │   └── Volve_Dataset_Akhir_Sempurna.csv     # Hasil akhir restorasi
+│   └── metadata/      
+│       ├── Deskripsi Variabel.csv
+│       └── Panduan Kualitas Data.csv
 ├── notebooks/
-│   ├── 01_EDA_and_Correlation.ipynb     # Statistik deskriptif & Matriks Korelasi Pearson
-│   ├── 02_Modeling_and_Evaluation.ipynb # Pelatihan model & Evaluasi metrik
-│   └── 03_Imputation_and_Export.ipynb   # Proses pengisian data hilang & Ekspor akhir
-├── models/            # Penyimpanan model terbaik (.pkl) dan scaler
-├── reports/           # Laporan PDF, Executive Summary, dan Poster
-└── README.md
+│   ├── 01_Data_Cleansing.ipynb                  # Penanganan anomali fisik & sensor
+│   ├── 02_Statistik_Deskriptif.ipynb            # Perhitungan min, max, mean, std
+│   ├── 03_Visualisasi_Data.ipynb                # Pembuatan 8 grafik (PPDAC)
+│   ├── 04_Analisis_Korelasi.ipynb               # Heatmap korelasi Pearson
+│   ├── 05_Transformasi_Data.ipynb               # Normalisasi dengan Min-Max Scaler
+│   └── 06_Machine_Learning_dan_Imputasi.ipynb   # Training, Evaluasi & Target Imputasi
+├── models/            
+│   ├── best_rf_model.pkl                        # Model ML pemenang
+│   └── scaler.pkl                               # Alat normalisasi data
+├── reports/                                     # Dokumen Laporan, Executive Summary, Poster
+├── README.md
 └── requirements.txt
 
 ```
 
 ## Alur Kerja (Workflow) PPDAC
 
-1. **Fase Eksplorasi (Notebook 01):** Melakukan Analisis Data Eksploratif (EDA) untuk mencari pola dan hubungan logis keteknikan. Hasil utamanya adalah Matriks Korelasi Pearson (Heatmap) dan 8 visualisasi statistik yang membandingkan tekanan, volume, dan pengaturan *choke*.
-2. **Fase Pelatihan Kecerdasan Buatan (Notebook 02):**
-* **Pra-pemrosesan Lanjutan:** Menerapkan metode *Backward Fill* dan *Forward Fill* (`bfill.ffill`) untuk memastikan tidak ada *missing values* pada sensor fitur, serta menggunakan `MinMaxScaler` agar algoritma belajar tanpa bias skala angka.
-* **Pemodelan & Evaluasi:** Membangun *Linear Regression*, *Random Forest*, dan *XGBoost*. Mengevaluasi performa ketiganya pada porsi data uji (20%) menggunakan metrik **RMSE, MAE, dan R-squared ($R^2$)**.
-* **Feature Importance:** Mengekstraksi bobot setiap parameter untuk menjawab sensor mana yang paling berpengaruh terhadap perubahan *choke*.
+1. **Bab 5: Data Cleansing (Data):** Membersihkan data mentah dari *outlier*, *missing values*, duplikasi, dan inkonsistensi fisik keteknikan (misal: BHP < WHP). Dataset dipecah menjadi data *training* dan target *impute*.
+2. **Bab 6: Statistik Deskriptif (Analysis):** Menjabarkan rentang nilai dan distribusi dasar setiap variabel produksi harian.
+3. **Bab 7: Visualisasi Data (Analysis):** Menyajikan 8 grafik komprehensif yang mencakup hubungan (Scatter Plot), komparasi (Boxplot), tren (Time-Series), dan hierarki (Pie Chart) parameter operasional.
+4. **Bab 8: Analisis Korelasi (Analysis):** Memvalidasi hubungan logis antar parameter sensor melalui *Heatmap* Matriks Korelasi Pearson.
+5. **Bab 9: Transformasi Data (Preparation):** Menyetarakan skala antar variabel (normalisasi) menggunakan `MinMaxScaler` agar algoritma belajar secara optimal.
+6. **Bab 10: Data Analytic & Imputasi (Conclusion):** * Melatih 3 model algoritma (*Linear Regression*, *Random Forest*, *XGBoost*).
+* Mengevaluasi model menggunakan metrik **RMSE, MAE, dan R-squared ($R^2$)**.
+* Mengekstrak *Feature Importance* untuk mengetahui parameter penentu bukaan *choke*.
+* Mengeksekusi imputasi untuk menambal data yang hilang dan merekonstruksi dataset akhir.
 
 
-3. **Fase Restorasi Data (Notebook 03):** Model dengan evaluasi terbaik dan alat normalisasi (*scaler*) dipanggil kembali untuk memprediksi dan mengisi nilai pada `AVG_CHOKE_SIZE_P` yang kosong. Dataset kemudian digabungkan utuh untuk dilaporkan.
 
 ## Hasil Utama (Key Findings)
 
-*(Catatan: Bagian ini dapat Anda perbarui setelah *running* kode selesai)*
+*(Catatan: Bagian ini dapat Anda perbarui setelah seluruh eksekusi kode selesai)*
 
 * **Model Terbaik:** [Misal: Random Forest / XGBoost] terbukti menjadi algoritma paling akurat untuk data sumur ini dengan nilai $R^2$ mencapai [Misal: 0.92].
 * **Feature Importance:** Analisis menunjukkan bahwa parameter **[Misal: AVG_WELLHEAD_PRESSURE]** memiliki korelasi dan pengaruh paling dominan dalam penentuan bukaan *choke*.
@@ -85,16 +89,15 @@ Proyek ini menggunakan dataset produksi harian dari Lapangan Volve yang telah me
 
 ## Cara Penggunaan
 
-1. Pastikan Anda memiliki lingkungan Python 3.8+ (seperti Anaconda, VS Code, atau Google Colab).
-2. Lakukan instalasi seluruh pustaka yang diperlukan dengan menjalankan perintah:
+1. Pastikan Anda memiliki lingkungan Python 3.8+ terinstal.
+2. Lakukan instalasi seluruh pustaka yang diperlukan dengan menjalankan perintah di terminal:
 ```bash
 pip install -r requirements.txt
 
 ```
 
 
-*(Pustaka utama meliputi: `pandas`, `numpy`, `matplotlib`, `seaborn`, `scikit-learn`, `xgboost`, `joblib`, `openpyxl`)*
-3. Jalankan *file notebook* secara berurutan mulai dari `01` hingga `03` untuk mereproduksi hasil.
+3. Eksekusi *file Jupyter Notebook* secara berurutan mulai dari `01` hingga `06` untuk memproduksi hasil analisis dan memulihkan data.
 
 ---
 
