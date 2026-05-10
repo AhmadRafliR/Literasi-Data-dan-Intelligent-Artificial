@@ -1,8 +1,18 @@
+# Manipulasi dan Analisis Data
 pandas
 numpy
+
+# Visualisasi Data
 matplotlib
 seaborn
+
+# Machine Learning & Preprocessing
 scikit-learn
 xgboost
+
+# Utilitas Tambahan
 joblib
 openpyxl
+
+# Dukungan Jupyter Notebook di VS Code
+ipykernel
